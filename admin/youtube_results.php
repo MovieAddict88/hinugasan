@@ -54,7 +54,7 @@ $searchResults = search_youtube($query, YOUTUBE_API_KEY, 'video,playlist', 50);
 $allResults = [];
 
 // Get existing songs from DB
-require_once '../includes/db.php';
+require_once '../db.php';
 $existing_video_ids = [];
 $sql = "SELECT video_source FROM songs";
 if ($result = $conn->query($sql)) {

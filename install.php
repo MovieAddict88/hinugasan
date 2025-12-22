@@ -191,8 +191,8 @@ echo "<li>Test the room creation feature</li>";
 echo "</ul>";
 
 echo "<div style='text-align: center; margin-top: 30px;'>";
-echo "<a href='../backend/admin/' class='btn btn-success'><i class='fas fa-sign-in-alt'></i> Go to Admin Login</a>";
-echo "<a href='../frontend/' class='btn'><i class='fas fa-play-circle'></i> Go to Karaoke Player</a>";
+echo "<a href='admin/' class='btn btn-success'><i class='fas fa-sign-in-alt'></i> Go to Admin Login</a>";
+echo "<a href='index.html' class='btn'><i class='fas fa-play-circle'></i> Go to Karaoke Player</a>";
 echo "<button onclick='deleteInstallFile()' class='btn btn-danger'><i class='fas fa-trash'></i> Delete This Installation File</button>";
 echo "</div>";
 echo "</div>";
@@ -204,7 +204,7 @@ function deleteInstallFile() {
             .then(response => response.text())
             .then(data => {
                 alert('Installation file deleted. Redirecting...');
-                window.location.href = '../frontend/';
+                window.location.href = 'index.html';
             })
             .catch(error => {
                 alert('Error deleting file. Please delete it manually.');

@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once "../includes/db.php";
+require_once "../db.php";
 
 if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);

@@ -25,7 +25,7 @@ if ($conn->connect_error) {
                 $conn = new mysqli(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_NAME);
                 
                 // Run schema if needed
-                $schema_file = dirname(dirname(__FILE__)) . '/database/schema.sql';
+                $schema_file = 'schema.sql';
                 if (file_exists($schema_file)) {
                     $schema_sql = file_get_contents($schema_file);
                     $conn->multi_query($schema_sql);
