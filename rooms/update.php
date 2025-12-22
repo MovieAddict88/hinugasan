@@ -9,8 +9,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user_name = $data['user_name'] ?? '';
     $action = $data['action'] ?? '';
     $song_id = $data['song_id'] ?? null;
-    $current_time = $data['current_time'] ?? 0;
-    $is_playing = $data['is_playing'] ?? 0;
+    $song_number = $data['song_number'] ?? null;
+    $current_time = $data['current_time'] ?? null;
+    $is_playing = $data['is_playing'] ?? null;
     
     if (empty($room_code) || empty($user_name) || empty($action)) {
         echo json_encode(['success' => false, 'message' => 'Missing required parameters']);
@@ -32,9 +33,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     switch ($action) {
         case 'add_song':
-            if (empty($song_id)) {
-                echo json_encode(['success' => false, 'message' => 'Song ID required']);
+            if (empty($song_id) && empty($song_number)) {
+                echo json_encode(['success' => false, 'message' => 'Song ID or Song Number is required']);
                 exit;
+            }
+
+            if (empty($song_id)) {
+                $song_id_sql = "SELECT id FROM songs WHERE song_number = ?";
+                $song_res = db_query_one($song_id_sql, [$song_number], 's');
+                if (!$song_res) {
+                    echo json_encode(['success' => false, 'message' => 'Song with that number not found']);
+                    exit;
+                }
+                $song_id = $song_res['id'];
             }
             
             // Check if song exists
@@ -98,9 +109,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             break;
             
         case 'set_current_song':
-            if (empty($song_id)) {
-                echo json_encode(['success' => false, 'message' => 'Song ID required']);
+            if (empty($song_id) && empty($song_number)) {
+                echo json_encode(['success' => false, 'message' => 'Song ID or Song Number is required']);
                 exit;
+            }
+
+            if (empty($song_id)) {
+                $song_id_sql = "SELECT id FROM songs WHERE song_number = ?";
+                $song_res = db_query_one($song_id_sql, [$song_number], 's');
+                if (!$song_res) {
+                    echo json_encode(['success' => false, 'message' => 'Song with that number not found']);
+                    exit;
+                }
+                $song_id = $song_res['id'];
             }
             
             // Get song details
@@ -139,11 +160,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             break;
             
         case 'play':
-            // Update room playback state
-            $play_sql = "UPDATE rooms SET is_playing = ?, current_song_time = ?, last_active = NOW() WHERE id = ?";
-            $stmt = $conn->prepare($play_sql);
-            $stmt->bind_param("iii", $is_playing, $current_time, $room['id']);
-            
+             if ($is_playing === null) {
+                echo json_encode(['success' => false, 'message' => 'is_playing parameter is required']);
+                exit;
+            }
+
+            if ($current_time !== null) {
+                $play_sql = "UPDATE rooms SET is_playing = ?, current_song_time = ?, last_active = NOW() WHERE id = ?";
+                $stmt = $conn->prepare($play_sql);
+                $stmt->bind_param("idi", $is_playing, $current_time, $room['id']);
+            } else {
+                $play_sql = "UPDATE rooms SET is_playing = ?, last_active = NOW() WHERE id = ?";
+                $stmt = $conn->prepare($play_sql);
+                $stmt->bind_param("ii", $is_playing, $room['id']);
+            }
+
             if ($stmt->execute()) {
                 echo json_encode(['success' => true, 'message' => 'Playback state updated']);
             } else {
@@ -202,6 +233,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'success' => true, 
                     'message' => 'No more songs in queue',
                     'next_song' => null
+                ]);
+            }
+            break;
+
+        case 'prev_song':
+            $current_song_id = $room['current_song_id'];
+
+            // Mark current playing song as pending
+            if ($current_song_id) {
+                $update_current_sql = "UPDATE room_queue SET status = 'pending'
+                                       WHERE room_id = ? AND song_id = ? AND status = 'playing'";
+                $current_stmt = $conn->prepare($update_current_sql);
+                $current_stmt->bind_param("ii", $room['id'], $current_song_id);
+                $current_stmt->execute();
+                $current_stmt->close();
+            }
+
+            // Get last played song
+            $prev_song_sql = "SELECT rq.*, s.* FROM room_queue rq
+                              JOIN songs s ON rq.song_id = s.id
+                              WHERE rq.room_id = ? AND rq.status = 'played'
+                              ORDER BY rq.played_at DESC LIMIT 1";
+            $prev_song = db_query_one($prev_song_sql, [$room['id']], 'i');
+
+            if ($prev_song) {
+                // Update room with prev song
+                $update_room_sql = "UPDATE rooms SET current_song_id = ?, current_song_time = 0,
+                                    is_playing = 1, last_active = NOW() WHERE id = ?";
+                $room_stmt = $conn->prepare($update_room_sql);
+                $room_stmt->bind_param("ii", $prev_song['song_id'], $room['id']);
+                $room_stmt->execute();
+                $room_stmt->close();
+
+                // Update queue status
+                $update_prev_sql = "UPDATE room_queue SET status = 'playing' WHERE id = ?";
+                $prev_stmt = $conn->prepare($update_prev_sql);
+                $prev_stmt->bind_param("i", $prev_song['id']);
+                $prev_stmt->execute();
+                $prev_stmt->close();
+
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Previous song set',
+                    'prev_song' => $prev_song
+                ]);
+            } else {
+                 if ($current_song_id) {
+                    $update_current_sql = "UPDATE room_queue SET status = 'playing'
+                                           WHERE room_id = ? AND song_id = ? AND status = 'pending'";
+                    $current_stmt = $conn->prepare($update_current_sql);
+                    $current_stmt->bind_param("ii", $room['id'], $current_song_id);
+                    $current_stmt->execute();
+                    $current_stmt->close();
+                }
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'No previous songs in history',
+                    'prev_song' => null
                 ]);
             }
             break;

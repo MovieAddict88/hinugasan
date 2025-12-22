@@ -861,6 +861,39 @@ function showRoomList() {
     loadRoomList();
 }
 
+function showFamilyMode() {
+    const creatorName = prompt("Enter your name:");
+    if (!creatorName) return;
+
+    const roomName = "Family Room";
+
+    fetch('rooms/create.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            room_name: roomName,
+            creator_name: creatorName,
+            is_public: false,
+            mode: 'family'
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const roomId = data.room_id;
+            window.location.href = `family.html?room_id=${roomId}&role=creator`;
+        } else {
+            alert('Error creating family room: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while creating the family room.');
+    });
+}
+
 function enterSoloMode() {
     currentRoom = null;
     currentUser = {
