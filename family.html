@@ -14,137 +14,111 @@
 <body>
     <div id="family-container">
         <!-- Creator View -->
-        <div id="creator-view" style="display: none;">
-             <div id="karaoke-container" class="karaoke-container">
-        <!-- Room Header -->
-        <div class="room-header" id="room-header">
-            <div class="room-info">
-                <div class="room-title">
-                    <h2><i class="fas fa-users"></i> <span id="room-title-text">Room Name</span></h2>
-                    <div class="room-code">
-                        <span>Code: </span>
-                        <strong id="room-code-display">XXXXXXX</strong>
-                        <button class="copy-btn" onclick="copyRoomCode()">
-                            <i class="fas fa-copy"></i> Copy
-                        </button>
+        <div id="creator-view" class="karaoke-container" style="display: none;">
+            <!-- Room Header -->
+            <div class="room-header" id="room-header">
+                <div class="room-info">
+                    <div class="room-title">
+                        <h2><i class="fas fa-users"></i> <span id="room-title-text">Family Room</span></h2>
+                        <div class="room-code">
+                            <span>Code: </span>
+                            <strong id="room-code-display">XXXXXXX</strong>
+                            <button class="copy-btn" onclick="copyRoomCode()">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                    </div>
+                    <div class="room-users" id="room-users-list">
+                        <!-- Users will be loaded here -->
                     </div>
                 </div>
-                <div class="room-users" id="room-users-list">
-                    <!-- Users will be loaded here -->
+                <div class="room-actions">
+                    <button class="btn-leave-room" onclick="leaveRoom()">
+                        <i class="fas fa-sign-out-alt"></i> Leave Room
+                    </button>
+                    <button class="btn-back" onclick="backToWelcome()">
+                        <i class="fas fa-home"></i> Home
+                    </button>
                 </div>
             </div>
-            <div class="room-actions">
-                <button class="btn-leave-room" onclick="leaveRoom()">
-                    <i class="fas fa-sign-out-alt"></i> Leave Room
-                </button>
-                <button class="btn-invite" onclick="showInviteModal()">
-                    <i class="fas fa-share-alt"></i> Invite
-                </button>
-                <button class="btn-back" onclick="backToWelcome()">
-                    <i class="fas fa-home"></i> Home
-                </button>
-            </div>
-        </div>
 
-        <!-- Main Content -->
-        <div class="karaoke-main-grid">
-            <!-- Video Player Section -->
-            <div class="video-container">
-                <div class="now-playing">
-                    <h2><i class="fas fa-play"></i> Now Playing</h2>
-                    <div id="current-song-info">
-                        <em>No song playing</em>
+            <!-- Main Content -->
+            <div class="karaoke-main-grid">
+                <!-- Video Player Section -->
+                <div class="video-container">
+                    <div class="now-playing">
+                        <h2><i class="fas fa-play"></i> Now Playing</h2>
+                        <div id="current-song-info">
+                            <em>No song playing</em>
+                        </div>
+                    </div>
+                    <video id="video-player" class="video-js vjs-default-skin vjs-big-play-centered"
+                           controls preload="auto"
+                           poster="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQwIiBoZWlnaHQ9IjM2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMWExYjFjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJJbnRlciIgZm9udC1zaXplPSIyNCIgZmlsbD0iI2ZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPktBUkFLT0UgUExBWUVSPC90ZXh0Pjx0ZXh0IHg9IjUwJSIgeT0iNjAlIiBmb250LWZhbWlseT0iSW50ZXIiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiNiMmIyYjIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5TZWxlY3QgYSBzb25nIHRvIHN0YXJ0PC90ZXh0Pjwvc3ZnPg=="
+                           data-setup='{ "techOrder": ["youtube"], "sources": [{ "type": "video/youtube" }] }'>
+                    </video>
+                </div>
+
+                <!-- Room Queue Section -->
+                <div class="room-queue-container">
+                    <div class="queue-header">
+                        <h2><i class="fas fa-list-ol"></i> Room Queue <span id="queue-count">0</span></h2>
+                    </div>
+                    <div class="queue-list-wrapper">
+                        <ul id="queue-list">
+                            <div class="empty-message">Queue is empty.</div>
+                        </ul>
                     </div>
                 </div>
-                <video id="video-player" class="video-js vjs-default-skin vjs-big-play-centered"
-                       controls preload="auto"
-                       poster="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQwIiBoZWlnaHQ9IjM2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMWExYjFjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJJbnRlciIgZm9udC1zaXplPSIyNCIgZmlsbD0iI2ZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPktBUkFLT0UgUExBWUVSPC90ZXh0Pjx0ZXh0IHg9IjUwJSIgeT0iNjAlIiBmb250LWZhbWlseT0iSW50ZXIiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiNiMmIyYjIiIHRleHQtYW5jaGG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5TZWxlY3QgYSBzb25nIHRvIHN0YXJ0PC90ZXh0Pjwvc3ZnPg=="
-                       data-setup='{ "techOrder": ["youtube"], "sources": [{ "type": "video/youtube" }] }'>
-                    <p class="vjs-no-js">
-                        To view this video please enable JavaScript, and consider upgrading to a
-                        web browser that <a href="https://videojs.com/html5-video-support/" target="_blank" rel="noopener noreferrer">supports HTML5 video</a>
-                    </p>
-                </video>
             </div>
-
-            <!-- Room Queue Section -->
-            <div class="room-queue-container">
-                <div class="queue-header">
-                    <h2><i class="fas fa-list-ol"></i> Room Queue <span id="queue-count">0</span></h2>
-                    <div class="queue-actions">
-                        <button id="clear-queue" class="icon-btn" title="Clear Queue">
-                            <i class="fas fa-trash"></i> Clear
-                        </button>
-                    </div>
-                </div>
-                <div class="queue-list-wrapper">
-                    <ul id="queue-list">
-                        <div class="empty-message">Queue is empty. Add songs to get started!</div>
-                    </ul>
-                </div>
-
-                <!-- Recently Played -->
-                <div class="recently-played">
-                    <h3><i class="fas fa-history"></i> Recently Played</h3>
-                    <ul id="recently-played-list">
-                        <li class="empty-message">No songs played yet</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
         </div>
 
         <!-- Songlist View -->
-        <div id="songlist-view" style="display: none;">
-            <div class="song-list-container">
-                    <div class="songlist-header">
-                        <h2><i class="fas fa-music"></i> Available Songs</h2>
-                        <input type="text" id="song-search"
-                               placeholder="Filter songs..."
-                               autocomplete="off">
-                    </div>
-                    <div class="song-list-wrapper">
-                        <ul id="song-list">
-                            <div class="empty-message loading">Loading songs...</div>
-                        </ul>
-                    </div>
-                    <div id="pagination-controls">
-                        <button id="prev-page" class="pagination-btn">
-                            <i class="fas fa-chevron-left"></i> Prev
-                        </button>
-                        <span id="page-indicator">Page 1 / 1</span>
-                        <button id="next-page" class="pagination-btn">
-                            Next <i class="fas fa-chevron-right"></i>
-                        </button>
-                    </div>
+        <div id="songlist-view" style="display: none; height: 100vh; width: 100vw; background-color: #1a1b1c; color: #fff;">
+            <div class="song-list-container" style="height: 100%; display: flex; flex-direction: column;">
+                <div class="songlist-header">
+                    <h2><i class="fas fa-music"></i> Available Songs</h2>
+                    <input type="text" id="song-search" placeholder="Filter songs..." autocomplete="off">
                 </div>
+                <div class="song-list-wrapper" style="flex-grow: 1;">
+                    <ul id="song-list">
+                        <div class="empty-message loading">Loading songs...</div>
+                    </ul>
+                </div>
+                <div id="pagination-controls">
+                    <button id="prev-page" class="pagination-btn"><i class="fas fa-chevron-left"></i> Prev</button>
+                    <span id="page-indicator">Page 1 / 1</span>
+                    <button id="next-page" class="pagination-btn">Next <i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
         </div>
 
         <!-- Number Pad View -->
-        <div id="number-pad-view" style="display: none; height: 100vh; width: 100vw; flex-direction: column; justify-content: center; align-items: center; background-color: #121212; overflow: hidden;">
-            <div id="entered-number-display" style="color: #fff; font-size: 48px; font-family: 'Poppins', sans-serif; height: 80px; margin-bottom: 20px; letter-spacing: 5px;"></div>
-            <div class="dial-container" style="position: relative; width: 450px; height: 450px; border-radius: 50%; background-color: #1e1e1e; border: 8px solid #2a2a2a; box-shadow: 0 0 40px rgba(0,0,0,0.6);">
+        <div id="number-pad-view" style="display: none; height: 100vh; width: 100vw; flex-direction: column; justify-content: center; align-items: center; background: linear-gradient(45deg, #1d2b64, #f8cdda); overflow: hidden; font-family: 'Poppins', sans-serif;">
+            <div id="entered-number-display" style="color: #fff; font-size: 5vw; font-weight: 600; height: 10vh; margin-bottom: 3vh; letter-spacing: 8px; text-shadow: 0 0 15px rgba(0,0,0,0.5);"></div>
+            <div class="dial-container" style="position: relative; width: 60vh; height: 60vh; min-width: 300px; min-height: 300px; max-width: 500px; max-height: 500px;">
 
                 <!-- Center Controls -->
-                <div class="center-controls" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
-                    <button class="control-button" id="num-play" title="Play" style="width: 70px; height: 70px; border-radius: 50%; border: none; background-color: #4CAF50; color: white; font-size: 28px; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: background-color 0.3s;"><i class="fas fa-play"></i></button>
-                    <button class="control-button" id="num-pause" title="Pause" style="width: 70px; height: 70px; border-radius: 50%; border: none; background-color: #FF9800; color: white; font-size: 28px; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: background-color 0.3s;"><i class="fas fa-pause"></i></button>
-                    <button class="control-button" id="num-prev" title="Previous" style="width: 70px; height: 70px; border-radius: 50%; border: none; background-color: #2196F3; color: white; font-size: 28px; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: background-color 0.3s;"><i class="fas fa-backward"></i></button>
-                    <button class="control-button" id="num-next" title="Next" style="width: 70px; height: 70px; border-radius: 50%; border: none; background-color: #2196F3; color: white; font-size: 28px; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: background-color 0.3s;"><i class="fas fa-forward"></i></button>
+                <div class="center-controls" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5vh;">
+                    <button class="control-button" id="num-play" title="Play" style="width: 10vh; height: 10vh; border-radius: 50%; border: none; background-color: #28a745; color: white; font-size: 4vh; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 5px 15px rgba(0,0,0,0.3);"><i class="fas fa-play"></i></button>
+                    <button class="control-button" id="num-pause" title="Pause" style="width: 10vh; height: 10vh; border-radius: 50%; border: none; background-color: #ffc107; color: white; font-size: 4vh; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 5px 15px rgba(0,0,0,0.3);"><i class="fas fa-pause"></i></button>
+                    <button class="control-button" id="num-prev" title="Previous" style="width: 10vh; height: 10vh; border-radius: 50%; border: none; background-color: #17a2b8; color: white; font-size: 4vh; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 5px 15px rgba(0,0,0,0.3);"><i class="fas fa-backward"></i></button>
+                    <button class="control-button" id="num-next" title="Next" style="width: 10vh; height: 10vh; border-radius: 50%; border: none; background-color: #17a2b8; color: white; font-size: 4vh; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 5px 15px rgba(0,0,0,0.3);"><i class="fas fa-forward"></i></button>
                 </div>
 
                 <!-- Number Buttons -->
-                <button class="num-button" data-number="1" style="position: absolute; width: 60px; height: 60px; border-radius: 50%; border: none; color: white; font-size: 28px; font-weight: bold; display: flex; justify-content: center; align-items: center; cursor: pointer; background-color: #E91E63; top: calc(50% - 190px); left: 50%; transform: translate(-50%, -50%);">1</button>
-                <button class="num-button" data-number="2" style="position: absolute; width: 60px; height: 60px; border-radius: 50%; border: none; color: white; font-size: 28px; font-weight: bold; display: flex; justify-content: center; align-items: center; cursor: pointer; background-color: #9C27B0; top: calc(50% - 190px * 0.809); left: calc(50% + 190px * 0.588); transform: translate(-50%, -50%);">2</button>
-                <button class="num-button" data-number="3" style="position: absolute; width: 60px; height: 60px; border-radius: 50%; border: none; color: white; font-size: 28px; font-weight: bold; display: flex; justify-content: center; align-items: center; cursor: pointer; background-color: #673AB7; top: calc(50% - 190px * 0.309); left: calc(50% + 190px * 0.951); transform: translate(-50%, -50%);">3</button>
-                <button class="num-button" data-number="4" style="position: absolute; width: 60px; height: 60px; border-radius: 50%; border: none; color: white; font-size: 28px; font-weight: bold; display: flex; justify-content: center; align-items: center; cursor: pointer; background-color: #3F51B5; top: calc(50% + 190px * 0.309); left: calc(50% + 190px * 0.951); transform: translate(-50%, -50%);">4</button>
-                <button class="num-button" data-number="5" style="position: absolute; width: 60px; height: 60px; border-radius: 50%; border: none; color: white; font-size: 28px; font-weight: bold; display: flex; justify-content: center; align-items: center; cursor: pointer; background-color: #00BCD4; top: calc(50% + 190px * 0.809); left: calc(50% + 190px * 0.588); transform: translate(-50%, -50%);">5</button>
-                <button class="num-button" data-number="6" style="position: absolute; width: 60px; height: 60px; border-radius: 50%; border: none; color: white; font-size: 28px; font-weight: bold; display: flex; justify-content: center; align-items: center; cursor: pointer; background-color: #009688; top: calc(50% + 190px); left: 50%; transform: translate(-50%, -50%);">6</button>
-                <button class="num-button" data-number="7" style="position: absolute; width: 60px; height: 60px; border-radius: 50%; border: none; color: white; font-size: 28px; font-weight: bold; display: flex; justify-content: center; align-items: center; cursor: pointer; background-color: #4CAF50; top: calc(50% + 190px * 0.809); left: calc(50% - 190px * 0.588); transform: translate(-50%, -50%);">7</button>
-                <button class="num-button" data-number="8" style="position: absolute; width: 60px; height: 60px; border-radius: 50%; border: none; color: white; font-size: 28px; font-weight: bold; display: flex; justify-content: center; align-items: center; cursor: pointer; background-color: #8BC34A; top: calc(50% + 190px * 0.309); left: calc(50% - 190px * 0.951); transform: translate(-50%, -50%);">8</button>
-                <button class="num-button" data-number="9" style="position: absolute; width: 60px; height: 60px; border-radius: 50%; border: none; color: white; font-size: 28px; font-weight: bold; display: flex; justify-content: center; align-items: center; cursor: pointer; background-color: #CDDC39; top: calc(50% - 190px * 0.309); left: calc(50% - 190px * 0.951); transform: translate(-50%, -50%);">9</button>
-                <button class="num-button" data-number="0" style="position: absolute; width: 60px; height: 60px; border-radius: 50%; border: none; color: white; font-size: 28px; font-weight: bold; display: flex; justify-content: center; align-items: center; cursor: pointer; background-color: #FFC107; top: calc(50% - 190px * 0.809); left: calc(50% - 190px * 0.588); transform: translate(-50%, -50%);">0</button>
+                <button class="num-button" data-number="1" style="position: absolute; width: 8vh; height: 8vh; border-radius: 50%; border: none; color: white; font-size: 4vh; font-weight: bold; cursor: pointer; background-color: #dc3545; top: calc(50% - 25vh); left: 50%; transform: translate(-50%, -50%);">1</button>
+                <button class="num-button" data-number="2" style="position: absolute; width: 8vh; height: 8vh; border-radius: 50%; border: none; color: white; font-size: 4vh; font-weight: bold; cursor: pointer; background-color: #fd7e14; top: calc(50% - 25vh * 0.809); left: calc(50% + 25vh * 0.588); transform: translate(-50%, -50%);">2</button>
+                <button class="num-button" data-number="3" style="position: absolute; width: 8vh; height: 8vh; border-radius: 50%; border: none; color: white; font-size: 4vh; font-weight: bold; cursor: pointer; background-color: #ffc107; top: calc(50% - 25vh * 0.309); left: calc(50% + 25vh * 0.951); transform: translate(-50%, -50%);">3</button>
+                <button class="num-button" data-number="4" style="position: absolute; width: 8vh; height: 8vh; border-radius: 50%; border: none; color: white; font-size: 4vh; font-weight: bold; cursor: pointer; background-color: #28a745; top: calc(50% + 25vh * 0.309); left: calc(50% + 25vh * 0.951); transform: translate(-50%, -50%);">4</button>
+                <button class="num-button" data-number="5" style="position: absolute; width: 8vh; height: 8vh; border-radius: 50%; border: none; color: white; font-size: 4vh; font-weight: bold; cursor: pointer; background-color: #20c997; top: calc(50% + 25vh * 0.809); left: calc(50% + 25vh * 0.588); transform: translate(-50%, -50%);">5</button>
+                <button class="num-button" data-number="6" style="position: absolute; width: 8vh; height: 8vh; border-radius: 50%; border: none; color: white; font-size: 4vh; font-weight: bold; cursor: pointer; background-color: #17a2b8; top: calc(50% + 25vh); left: 50%; transform: translate(-50%, -50%);">6</button>
+                <button class="num-button" data-number="7" style="position: absolute; width: 8vh; height: 8vh; border-radius: 50%; border: none; color: white; font-size: 4vh; font-weight: bold; cursor: pointer; background-color: #6610f2; top: calc(50% + 25vh * 0.809); left: calc(50% - 25vh * 0.588); transform: translate(-50%, -50%);">7</button>
+                <button class="num-button" data-number="8" style="position: absolute; width: 8vh; height: 8vh; border-radius: 50%; border: none; color: white; font-size: 4vh; font-weight: bold; cursor: pointer; background-color: #6f42c1; top: calc(50% + 25vh * 0.309); left: calc(50% - 25vh * 0.951); transform: translate(-50%, -50%);">8</button>
+                <button class="num-button" data-number="9" style="position: absolute; width: 8vh; height: 8vh; border-radius: 50%; border: none; color: white; font-size: 4vh; font-weight: bold; cursor: pointer; background-color: #e83e8c; top: calc(50% - 25vh * 0.309); left: calc(50% - 25vh * 0.951); transform: translate(-50%, -50%);">9</button>
+                <button class="num-button" data-number="0" style="position: absolute; width: 8vh; height: 8vh; border-radius: 50%; border: none; color: white; font-size: 4vh; font-weight: bold; cursor: pointer; background-color: #343a40; top: calc(50% - 25vh * 0.809); left: calc(50% - 25vh * 0.588); transform: translate(-50%, -50%);">0</button>
+                <button class="num-button" id="num-backspace" style="position: absolute; width: 8vh; height: 8vh; border-radius: 50%; border: none; color: white; font-size: 4vh; font-weight: bold; cursor: pointer; background-color: #6c757d; top: calc(50% - 37vh); left: calc(50% - 15vh); transform: translate(-50%, -50%);"><i class="fas fa-backspace"></i></button>
+                <button class="num-button" id="num-clear" style="position: absolute; width: 8vh; height: 8vh; border-radius: 50%; border: none; color: white; font-size: 4vh; font-weight: bold; cursor: pointer; background-color: #6c757d; top: calc(50% - 37vh); left: calc(50% + 15vh); transform: translate(-50%, -50%);">C</button>
             </div>
         </div>
     </div>

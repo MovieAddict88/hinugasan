@@ -9,6 +9,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user_name = $data['user_name'] ?? '';
     $password = $data['password'] ?? '';
     $device = $data['device'] ?? 'mobile';
+    $join_as = $data['join_as'] ?? 'room'; // 'room' or 'family'
+    $role = $data['role'] ?? null;
     
     if (empty($room_code) || empty($user_name)) {
         echo json_encode(['success' => false, 'message' => 'Room code and user name are required']);
@@ -27,6 +29,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     if (!$room) {
         echo json_encode(['success' => false, 'message' => 'Room not found or expired']);
+        exit;
+    }
+
+    // Check if joining the correct room mode
+    if ($room['mode'] !== $join_as) {
+        $message = ($join_as === 'family')
+            ? 'This code is for a regular room. Please use the "Join Room" option.'
+            : 'This code is for a family room. Please use the "Join Family" option.';
+        echo json_encode(['success' => false, 'message' => $message]);
         exit;
     }
     
@@ -52,14 +63,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     if ($existing_user) {
         // Update existing user
-        $update_sql = "UPDATE room_users SET is_online = 1, device_type = ?, last_seen = NOW() WHERE id = ?";
+        $update_sql = "UPDATE room_users SET is_online = 1, device_type = ?, role = ?, last_seen = NOW() WHERE id = ?";
         $stmt = $conn->prepare($update_sql);
-        $stmt->bind_param("si", $device, $existing_user['id']);
+        $stmt->bind_param("ssi", $device, $role, $existing_user['id']);
     } else {
         // Add new user
-        $insert_sql = "INSERT INTO room_users (room_id, user_name, device_type, is_online) VALUES (?, ?, ?, 1)";
+        $insert_sql = "INSERT INTO room_users (room_id, user_name, device_type, is_online, role) VALUES (?, ?, ?, 1, ?)";
         $stmt = $conn->prepare($insert_sql);
-        $stmt->bind_param("iss", $room['id'], $user_name, $device);
+        $stmt->bind_param("isss", $room['id'], $user_name, $device, $role);
     }
     
     if ($stmt->execute()) {
