@@ -15,8 +15,7 @@ define('ADMIN_USERNAME', 'admin');
 define('ADMIN_PASSWORD', 'password123');
 
 // Get the base directory (htdocs folder)
-define('BASE_DIR', dirname(dirname(__DIR__)) . '/htdocs');
-define('UPLOADS_DIR', BASE_DIR . '/uploads');
+define('UPLOADS_DIR', __DIR__ . '/uploads');
 
 echo "<!DOCTYPE html><html><head><title>Karaoke System Installation</title>
       <meta name='viewport' content='width=device-width, initial-scale=1'>
@@ -162,7 +161,7 @@ if (defined('YOUTUBE_API_KEY') && YOUTUBE_API_KEY != 'AIzaSyCuDFW3lSVrvc-nGUeQOk
 }
 
 // Check uploads directory within htdocs
-$uploads_dir = dirname(dirname(__DIR__)) . '/htdocs/uploads';
+$uploads_dir = UPLOADS_DIR;
 echo "<p>Checking uploads directory: <code>" . $uploads_dir . "</code></p>";
 
 if (!is_dir($uploads_dir)) {
