@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Professional Karaoke Player | Collaborative Singing Platform</title>
+    <meta name="description" content="Professional karaoke player with YouTube integration, song queue management, and real-time room collaboration">
+    <link href="https://vjs.zencdn.net/8.0.4/video-js.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <meta name="theme-color" content="#4a00e0"/>
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
+    <link rel="manifest" href="site.webmanifest">
+</head>
+<body>
+    <!-- Welcome Screen -->
+    <div id="welcome-screen" class="welcome-screen">
+        <div class="welcome-container">
+            <div class="welcome-header">
+                <h1><i class="fas fa-microphone-alt"></i> Karaoke Party</h1>
+                <p class="subtitle">Sing alone or create a room to sing with friends!</p>
+            </div>
+            
+            <div class="welcome-options">
+                <div class="option-card" id="solo-mode">
+                    <div class="option-icon">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <h3>Solo Mode</h3>
+                    <p>Sing by yourself with full control</p>
+                    <button class="option-btn" onclick="enterSoloMode()">
+                        <i class="fas fa-play"></i> Start Singing
+                    </button>
+                </div>
+                
+                <div class="option-card" id="create-room">
+                    <div class="option-icon">
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
+                    <h3>Create Room</h3>
+                    <p>Start a room and invite friends</p>
+                    <button class="option-btn" onclick="showCreateRoom()">
+                        <i class="fas fa-users"></i> Create Room
+                    </button>
+                </div>
+                
+                <div class="option-card" id="join-room">
+                    <div class="option-icon">
+                        <i class="fas fa-door-open"></i>
+                    </div>
+                    <h3>Join Room</h3>
+                    <p>Join an existing room with code</p>
+                    <button class="option-btn" onclick="showJoinRoom()">
+                        <i class="fas fa-sign-in-alt"></i> Join Room
+                    </button>
+                </div>
+                
+                <div class="option-card" id="room-list">
+                    <div class="option-icon">
+                        <i class="fas fa-list"></i>
+                    </div>
+                    <h3>Room List</h3>
+                    <p>Browse and join public rooms</p>
+                    <button class="option-btn" onclick="showRoomList()">
+                        <i class="fas fa-search"></i> Browse Rooms
+                    </button>
+                </div>
+            </div>
+            
+            <div class="quick-join">
+                <h3>Quick Join with Code</h3>
+                <div class="quick-join-form">
+                    <input type="text" id="quick-room-code" placeholder="Enter 8-digit room code" maxlength="8">
+                    <input type="text" id="quick-user-name" placeholder="Your name">
+                    <button onclick="quickJoinRoom()">
+                        <i class="fas fa-bolt"></i> Quick Join
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Room Modal -->
+    <div id="create-room-modal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2><i class="fas fa-plus-circle"></i> Create New Room</h2>
+                <button class="modal-close" onclick="closeModal('create-room-modal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="create-room-form">
+                    <div class="form-group">
+                        <label for="room-name"><i class="fas fa-heading"></i> Room Name</label>
+                        <input type="text" id="room-name" placeholder="Enter room name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="creator-name"><i class="fas fa-user"></i> Your Name</label>
+                        <input type="text" id="creator-name" placeholder="Enter your display name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="room-password"><i class="fas fa-lock"></i> Room Password (Optional)</label>
+                        <input type="password" id="room-password" placeholder="Leave empty for public room">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="max-users"><i class="fas fa-users"></i> Max Users</label>
+                            <select id="max-users">
+                                <option value="5">5 users</option>
+                                <option value="10" selected>10 users</option>
+                                <option value="15">15 users</option>
+                                <option value="20">20 users</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="device-type"><i class="fas fa-mobile-alt"></i> Device Type</label>
+                            <select id="device-type">
+                                <option value="mobile">Mobile</option>
+                                <option value="tablet">Tablet</option>
+                                <option value="desktop">Desktop</option>
+                                <option value="tv">TV</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="is-public" checked>
+                            <span>Make room public (visible in room list)</span>
+                        </label>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" onclick="closeModal('create-room-modal')">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-play-circle"></i> Create Room
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Join Room Modal -->
+    <div id="join-room-modal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2><i class="fas fa-sign-in-alt"></i> Join Room</h2>
+                <button class="modal-close" onclick="closeModal('join-room-modal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="join-room-form">
+                    <div class="form-group">
+                        <label for="join-room-code"><i class="fas fa-hashtag"></i> Room Code</label>
+                        <input type="text" id="join-room-code" placeholder="8-digit room code" maxlength="8" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="join-user-name"><i class="fas fa-user"></i> Your Name</label>
+                        <input type="text" id="join-user-name" placeholder="Enter your display name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="join-password"><i class="fas fa-key"></i> Room Password (if required)</label>
+                        <input type="password" id="join-password" placeholder="Enter password if room is private">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="join-device-type"><i class="fas fa-mobile-alt"></i> Device Type</label>
+                        <select id="join-device-type">
+                            <option value="mobile">Mobile</option>
+                            <option value="tablet">Tablet</option>
+                            <option value="desktop">Desktop</option>
+                            <option value="tv">TV</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" onclick="closeModal('join-room-modal')">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-door-open"></i> Join Room
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Room List Modal -->
+    <div id="room-list-modal" class="modal-overlay">
+        <div class="modal-container wide-modal">
+            <div class="modal-header">
+                <h2><i class="fas fa-list"></i> Public Rooms</h2>
+                <div class="header-actions">
+                    <div class="search-box">
+                        <input type="text" id="room-search" placeholder="Search rooms...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <button class="modal-close" onclick="closeModal('room-list-modal')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="room-list-container">
+                    <div class="room-list-header">
+                        <div class="room-list-stats">
+                            <span id="room-count">0</span> active rooms
+                        </div>
+                        <button class="btn-refresh" onclick="loadRoomList()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                    
+                    <div class="room-list" id="room-list-content">
+                        <!-- Rooms will be loaded here -->
+                        <div class="loading-room">
+                            <i class="fas fa-spinner fa-spin"></i> Loading rooms...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Karaoke Container (Hidden by default) -->
+    <div id="karaoke-container" class="karaoke-container" style="display: none;">
+        <!-- Room Header -->
+        <div class="room-header" id="room-header">
+            <div class="room-info">
+                <div class="room-title">
+                    <h2><i class="fas fa-users"></i> <span id="room-title-text">Room Name</span></h2>
+                    <div class="room-code">
+                        <span>Code: </span>
+                        <strong id="room-code-display">XXXXXXX</strong>
+                        <button class="copy-btn" onclick="copyRoomCode()">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                </div>
+                <div class="room-users" id="room-users-list">
+                    <!-- Users will be loaded here -->
+                </div>
+            </div>
+            <div class="room-actions">
+                <button class="btn-leave-room" onclick="leaveRoom()">
+                    <i class="fas fa-sign-out-alt"></i> Leave Room
+                </button>
+                <button class="btn-invite" onclick="showInviteModal()">
+                    <i class="fas fa-share-alt"></i> Invite
+                </button>
+                <button class="btn-back" onclick="backToWelcome()">
+                    <i class="fas fa-home"></i> Home
+                </button>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="karaoke-main-grid">
+            <!-- Video Player Section -->
+            <div class="video-container">
+                <div class="now-playing">
+                    <h2><i class="fas fa-play"></i> Now Playing</h2>
+                    <div id="current-song-info">
+                        <em>No song playing</em>
+                    </div>
+                </div>
+                <video id="video-player" class="video-js vjs-default-skin vjs-big-play-centered" 
+                       controls preload="auto"
+                       poster="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQwIiBoZWlnaHQ9IjM2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMWExYjFjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJJbnRlciIgZm9udC1zaXplPSIyNCIgZmlsbD0iI2ZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPktBUkFLT0UgUExBWUVSPC90ZXh0Pjx0ZXh0IHg9IjUwJSIgeT0iNjAlIiBmb250LWZhbWlseT0iSW50ZXIiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiNiMmIyYjIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5TZWxlY3QgYSBzb25nIHRvIHN0YXJ0PC90ZXh0Pjwvc3ZnPg=="
+                       data-setup='{ "techOrder": ["youtube"], "sources": [{ "type": "video/youtube" }] }'>
+                    <p class="vjs-no-js">
+                        To view this video please enable JavaScript, and consider upgrading to a
+                        web browser that <a href="https://videojs.com/html5-video-support/" target="_blank" rel="noopener noreferrer">supports HTML5 video</a>
+                    </p>
+                </video>
+            </div>
+            
+            <!-- Room Queue Section -->
+            <div class="room-queue-container">
+                <div class="queue-header">
+                    <h2><i class="fas fa-list-ol"></i> Room Queue <span id="queue-count">0</span></h2>
+                    <div class="queue-actions">
+                        <button id="clear-queue" class="icon-btn" title="Clear Queue">
+                            <i class="fas fa-trash"></i> Clear
+                        </button>
+                    </div>
+                </div>
+                <div class="queue-list-wrapper">
+                    <ul id="queue-list">
+                        <div class="empty-message">Queue is empty. Add songs to get started!</div>
+                    </ul>
+                </div>
+                
+                <!-- Recently Played -->
+                <div class="recently-played">
+                    <h3><i class="fas fa-history"></i> Recently Played</h3>
+                    <ul id="recently-played-list">
+                        <li class="empty-message">No songs played yet</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Controls & Song List -->
+            <div class="controls-songlist-container">
+                <!-- Controls Section -->
+                <div class="controls">
+                    <div class="search-box">
+                        <input type="text" id="song-number-input" 
+                               placeholder="Search by number, title, or artist..."
+                               autocomplete="off">
+                        <button id="search-button" class="icon-btn">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                    </div>
+                    
+                    <div class="control-buttons">
+                        <button id="play-button" class="control-btn primary">
+                            <i class="fas fa-play"></i> Play Selected
+                        </button>
+                        <button id="play-resume-button" class="control-btn hidden">
+                            <i class="fas fa-play"></i> Play
+                        </button>
+                        <button id="next-button" class="control-btn">
+                            <i class="fas fa-forward"></i> Next Song
+                        </button>
+                        <button id="pause-button" class="control-btn hidden">
+                            <i class="fas fa-pause"></i> Pause
+                        </button>
+                    </div>
+                    
+                    <div class="volume-controls">
+                        <button id="volume-down" class="icon-btn small">
+                            <i class="fas fa-volume-down"></i>
+                        </button>
+                        <button id="volume-up" class="icon-btn small">
+                            <i class="fas fa-volume-up"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="player-status">
+                        <p>Status: <span id="player-status">Ready</span></p>
+                        <p>Songs: <span id="song-count">0</span></p>
+                        <p>Users: <span id="user-count">0</span></p>
+                    </div>
+                </div>
+                
+                <!-- Song List Section -->
+                <div class="song-list-container">
+                    <div class="songlist-header">
+                        <h2><i class="fas fa-music"></i> Available Songs</h2>
+                        <input type="text" id="song-search" 
+                               placeholder="Filter songs..."
+                               autocomplete="off">
+                    </div>
+                    <div class="song-list-wrapper">
+                        <ul id="song-list">
+                            <div class="empty-message loading">Loading songs...</div>
+                        </ul>
+                    </div>
+                    <div id="pagination-controls">
+                        <button id="prev-page" class="pagination-btn">
+                            <i class="fas fa-chevron-left"></i> Prev
+                        </button>
+                        <span id="page-indicator">Page 1 / 1</span>
+                        <button id="next-page" class="pagination-btn">
+                            Next <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Song Modal -->
+    <div id="add-song-modal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2><i class="fas fa-plus"></i> Add Song to Room Queue</h2>
+                <button class="modal-close" onclick="closeModal('add-song-modal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="selected-song-preview" id="selected-song-preview">
+                    <!-- Selected song preview -->
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-secondary" onclick="closeModal('add-song-modal')">
+                        Cancel
+                    </button>
+                    <button class="btn-primary" id="confirm-add-song">
+                        <i class="fas fa-plus"></i> Add to Queue
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Invite Modal -->
+    <div id="invite-modal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2><i class="fas fa-share-alt"></i> Invite Friends</h2>
+                <button class="modal-close" onclick="closeModal('invite-modal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="invite-code">
+                    <h3>Room Code</h3>
+                    <div class="code-display">
+                        <span id="invite-code">XXXXXXX</span>
+                        <button class="copy-btn" onclick="copyInviteCode()">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="invite-link">
+                    <h3>Quick Link</h3>
+                    <div class="link-display">
+                        <input type="text" id="invite-link" readonly>
+                        <button class="copy-btn" onclick="copyInviteLink()">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="invite-actions">
+                    <button class="btn-share" onclick="shareViaWhatsApp()">
+                        <i class="fab fa-whatsapp"></i> WhatsApp
+                    </button>
+                    <button class="btn-share" onclick="shareViaFacebook()">
+                        <i class="fab fa-facebook"></i> Facebook
+                    </button>
+                    <button class="btn-share" onclick="shareViaTelegram()">
+                        <i class="fab fa-telegram"></i> Telegram
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Video.js and YouTube plugin -->
+    <script src="https://vjs.zencdn.net/8.0.4/video.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@videojs/http-streaming@3.0.2/dist/videojs-http-streaming.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/videojs-youtube/3.0.1/Youtube.min.js"></script>
+    
+    <script src="script.js"></script>
+</body>
+</html>
