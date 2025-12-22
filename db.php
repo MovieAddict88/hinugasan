@@ -7,8 +7,7 @@ define('DB_NAME', 'if0_40702186_videoke');
 
 
 // Base paths for InfinityFree
-define('BASE_DIR', dirname(dirname(dirname(__DIR__))) . '/htdocs');
-define('UPLOADS_DIR', BASE_DIR . '/uploads');
+define('UPLOADS_DIR', __DIR__ . '/uploads');
 
 // Create connection
 $conn = new mysqli(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_NAME);
