@@ -1,7 +1,7 @@
 <?php
 header("Content-Type: application/json; charset=UTF-8");
 
-require_once '../config.php';
+require_once 'config.php';
 $apiKey = YOUTUBE_API_KEY;
 $query = isset($_GET['q']) ? urlencode($_GET['q']) : '';
 

@@ -8,7 +8,7 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
     exit;
 }
 
-require_once "../includes/db.php";
+require_once "../db.php";
 
 // Main logic to handle song addition
 if ($_SERVER["REQUEST_METHOD"] == "POST") {

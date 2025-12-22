@@ -6,7 +6,7 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
     exit;
 }
 
-require_once "../includes/db.php";
+require_once "../db.php";
 
 $title = $artist = $video_source = "";
 $title_err = $artist_err = $video_source_err = "";

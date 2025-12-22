@@ -6,7 +6,7 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
     exit;
 }
 
-require_once "../includes/db.php";
+require_once "../db.php";
 
 // Song submission logic
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_song'])) {

@@ -6,7 +6,7 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
     exit;
 }
 
-require_once "../includes/db.php";
+require_once "../db.php";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['room_id'])) {
     $room_id = trim($_POST['room_id']);

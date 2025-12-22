@@ -1,5 +1,4 @@
 <?php
-// backend/config.php
 
 // YouTube Data API v3 key - Replace with your own
 define('YOUTUBE_API_KEY', 'AIzaSyCuDFW3lSVrvc-nGUeQOkM7h_f_MA90NwY');

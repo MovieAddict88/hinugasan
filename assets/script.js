@@ -18,7 +18,7 @@ let selectedSongForQueue = null;
 // Room constants
 const ROOM_SYNC_INTERVAL = 3000;
 const USER_SYNC_INTERVAL = 10000;
-const API_BASE_URL = '../backend/api';
+const API_BASE_URL = '';
 const SONGS_PER_PAGE = 50;
 
 // DOM Elements
