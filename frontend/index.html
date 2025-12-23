@@ -77,6 +77,10 @@
                 <div class="quick-join-form">
                     <input type="text" id="quick-room-code" placeholder="Enter 8-digit room code" maxlength="8">
                     <input type="text" id="quick-user-name" placeholder="Your name">
+                    <select id="quick-join-type">
+                        <option value="room">Join Room</option>
+                        <option value="family">Join Family</option>
+                    </select>
                     <button onclick="quickJoinRoom()">
                         <i class="fas fa-bolt"></i> Quick Join
                     </button>
@@ -140,6 +144,13 @@
                         </label>
                     </div>
                     
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="is-family-room">
+                            <span>Family Mode</span>
+                        </label>
+                    </div>
+
                     <div class="form-actions">
                         <button type="button" class="btn-secondary" onclick="closeModal('create-room-modal')">
                             Cancel
