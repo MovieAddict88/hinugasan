@@ -59,6 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'success' => true,
             'room_code' => $room_code,
             'room_id' => $room_id,
+            'room_name' => $room_name,
             'message' => 'Room created successfully'
         ]);
     } else {

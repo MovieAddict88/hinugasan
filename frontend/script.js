@@ -222,7 +222,7 @@ async function createRoom() {
             currentRoom = {
                 room_code: result.room_code,
                 room_id: result.room_id,
-                room_name: roomName,
+                room_name: result.room_name,
                 creator_name: creatorName,
                 is_creator: true
             };
