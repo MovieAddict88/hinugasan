@@ -297,13 +297,23 @@ async function joinRoom(roomCode, userName, password = '', deviceType = null) {
 async function quickJoinRoom() {
     const roomCode = document.getElementById('quick-room-code').value.trim();
     const userName = document.getElementById('quick-user-name').value.trim() || generateRandomName();
-    
+    const joinType = document.querySelector('input[name="join-type"]:checked').value;
+
     if (!roomCode) {
-        showError('Please enter room code');
+        showError('Please enter a room code');
         return;
     }
-    
-    await joinRoom(roomCode, userName);
+
+    if (joinType === 'family') {
+        const role = prompt('Enter your role (songlist or number_pad):');
+        if (role && (role === 'songlist' || role === 'number_pad')) {
+            joinFamilyRoom(roomCode, userName, role);
+        } else {
+            showError('Invalid role. Please enter "songlist" or "number_pad".');
+        }
+    } else {
+        await joinRoom(roomCode, userName);
+    }
 }
 
 async function loadRoomList() {
@@ -856,42 +866,92 @@ function showJoinRoom() {
     showModal('join-room-modal');
 }
 
+function showJoinFamilyRoom() {
+    document.getElementById('join-family-user-name').value = generateRandomName();
+    showModal('join-family-room-modal');
+}
+
+async function joinFamilyRoom(roomCode, userName, role) {
+    if (!roomCode || !userName || !role) {
+        showError('Room code, user name, and role are required');
+        return;
+    }
+
+    const data = {
+        room_code: roomCode.toUpperCase(),
+        user_name: userName.trim(),
+        role: role,
+        join_as: 'family'
+    };
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/rooms/join.php`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            showNotification('Joined family room successfully!', 'success');
+            window.location.href = `family.html?room_code=${roomCode.toUpperCase()}&user_name=${userName.trim()}&role=${role}`;
+        } else {
+            showError(result.message || 'Failed to join family room');
+        }
+    } catch (error) {
+        console.error('Error joining family room:', error);
+        showError('Network error. Please check your connection.');
+    }
+}
+
 function showRoomList() {
     showModal('room-list-modal');
     loadRoomList();
 }
 
 function showFamilyMode() {
-    const creatorName = prompt("Enter your name:");
-    if (!creatorName) return;
+    document.getElementById('family-creator-name').value = generateRandomName();
+    showModal('create-family-room-modal');
+}
 
-    const roomName = "Family Room";
+async function createFamilyRoom() {
+    const roomName = document.getElementById('family-room-name').value;
+    const creatorName = document.getElementById('family-creator-name').value.trim();
+    const password = document.getElementById('family-room-password').value;
 
-    fetch('rooms/create.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            room_name: roomName,
-            creator_name: creatorName,
-            is_public: false,
-            mode: 'family'
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            const roomId = data.room_id;
-            window.location.href = `family.html?room_id=${roomId}&role=creator`;
+    if (!creatorName) {
+        showError('Please enter your name');
+        return;
+    }
+
+    const data = {
+        room_name: roomName,
+        creator_name: creatorName,
+        password: password,
+        is_public: false,
+        mode: 'family'
+    };
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/rooms/create.php`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            showNotification('Family room created successfully!', 'success');
+            window.location.href = `family.html?room_code=${result.room_code}&user_name=${creatorName}&role=creator`;
         } else {
-            alert('Error creating family room: ' + data.message);
+            showError(result.message || 'Failed to create family room');
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred while creating the family room.');
-    });
+    } catch (error) {
+        console.error('Error creating family room:', error);
+        showError('Network error. Please check your connection.');
+    }
 }
 
 function enterSoloMode() {
@@ -1386,6 +1446,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         const deviceType = document.getElementById('join-device-type').value;
         
         joinRoom(roomCode, userName, password, deviceType);
+    });
+
+    document.getElementById('join-family-room-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const roomCode = document.getElementById('join-family-room-code').value.trim();
+        const userName = document.getElementById('join-family-user-name').value.trim();
+        const role = document.getElementById('join-family-role').value;
+
+        joinFamilyRoom(roomCode, userName, role);
+    });
+
+    document.getElementById('create-family-room-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        createFamilyRoom();
     });
     
     // Search input listeners

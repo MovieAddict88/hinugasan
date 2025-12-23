@@ -21,6 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $device = $data['device'] ?? 'mobile';
     $max_users = $data['max_users'] ?? 10;
     $is_public = $data['is_public'] ?? 1;
+    $mode = $data['mode'] ?? 'room';
     
     if (empty($room_name) || empty($creator_name)) {
         echo json_encode(['success' => false, 'message' => 'Room name and creator name are required']);
@@ -38,20 +39,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $hashed_password = !empty($password) ? password_hash($password, PASSWORD_DEFAULT) : null;
     
     // Create room
-    $sql = "INSERT INTO rooms (room_code, room_name, password, creator_name, creator_device, max_users, is_public) 
-            VALUES (?, ?, ?, ?, ?, ?, ?)";
+    $sql = "INSERT INTO rooms (room_code, room_name, password, creator_name, creator_device, max_users, is_public, mode)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     
     global $conn;
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("sssssii", $room_code, $room_name, $hashed_password, $creator_name, $device, $max_users, $is_public);
+    $stmt->bind_param("sssssiis", $room_code, $room_name, $hashed_password, $creator_name, $device, $max_users, $is_public, $mode);
     
     if ($stmt->execute()) {
         $room_id = $conn->insert_id;
         
         // Add creator to room users
-        $user_sql = "INSERT INTO room_users (room_id, user_name, device_type, is_online) VALUES (?, ?, ?, 1)";
+        $user_sql = "INSERT INTO room_users (room_id, user_name, device_type, is_online, role) VALUES (?, ?, ?, 1, ?)";
         $user_stmt = $conn->prepare($user_sql);
-        $user_stmt->bind_param("iss", $room_id, $creator_name, $device);
+        $creator_role = ($mode === 'family') ? 'creator' : null;
+        $user_stmt->bind_param("isss", $room_id, $creator_name, $device, $creator_role);
         $user_stmt->execute();
         $user_stmt->close();
         
