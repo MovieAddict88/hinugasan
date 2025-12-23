@@ -911,36 +911,47 @@ function showRoomList() {
 }
 
 function showFamilyMode() {
-    const creatorName = prompt("Enter your name:");
-    if (!creatorName) return;
+    document.getElementById('family-creator-name').value = generateRandomName();
+    showModal('create-family-room-modal');
+}
 
-    const roomName = "Family Room";
+async function createFamilyRoom() {
+    const roomName = document.getElementById('family-room-name').value;
+    const creatorName = document.getElementById('family-creator-name').value.trim();
+    const password = document.getElementById('family-room-password').value;
 
-    fetch('rooms/create.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            room_name: roomName,
-            creator_name: creatorName,
-            is_public: false,
-            mode: 'family'
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            const roomId = data.room_id;
-            window.location.href = `family.html?room_id=${roomId}&role=creator`;
+    if (!creatorName) {
+        showError('Please enter your name');
+        return;
+    }
+
+    const data = {
+        room_name: roomName,
+        creator_name: creatorName,
+        password: password,
+        is_public: false,
+        mode: 'family'
+    };
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/rooms/create.php`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            showNotification('Family room created successfully!', 'success');
+            window.location.href = `family.html?room_code=${result.room_code}&user_name=${creatorName}&role=creator`;
         } else {
-            alert('Error creating family room: ' + data.message);
+            showError(result.message || 'Failed to create family room');
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred while creating the family room.');
-    });
+    } catch (error) {
+        console.error('Error creating family room:', error);
+        showError('Network error. Please check your connection.');
+    }
 }
 
 function enterSoloMode() {
@@ -1444,6 +1455,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         const role = document.getElementById('join-family-role').value;
 
         joinFamilyRoom(roomCode, userName, role);
+    });
+
+    document.getElementById('create-family-room-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        createFamilyRoom();
     });
     
     // Search input listeners
